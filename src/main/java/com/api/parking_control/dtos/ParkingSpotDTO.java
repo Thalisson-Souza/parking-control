@@ -1,19 +1,16 @@
 package com.api.parking_control.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import jakarta.validation.constraints.NotNull;
 
-@Data
-public class ParkingSpotDTO {
-
+public record ParkingSpotDTO(
     @NotBlank
-    private String parkingSpotNumber;
-
+    String parkingSpotNumber,
     @NotBlank
-    private String responsibleName;
-
+    String responsibleName,
     @NotBlank
-    private String block;
-
-    private CarDTO car;
-}
+    String block,
+    @NotNull
+    CarDTO car
+    )
+{}

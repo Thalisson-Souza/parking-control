@@ -1,19 +1,13 @@
 package com.api.parking_control.dtos;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
-@Data
-public class CarDTO {
+public record CarDTO(
     @NotBlank
-    private String responsibleCar;
-
+    String plateCar,
     @NotBlank
-    private String plateCar;
-
+    String modelCar,
     @NotBlank
-    private String modelCar;
-
-    @NotBlank
-    private String colorCar;
-}
+    String colorCar
+    )
+{}
