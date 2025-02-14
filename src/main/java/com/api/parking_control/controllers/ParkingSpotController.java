@@ -6,6 +6,7 @@ import com.api.parking_control.entity.ParkingSpot;
 import com.api.parking_control.repository.CarRepository;
 import com.api.parking_control.services.ParkingSpotService;
 import jakarta.validation.Valid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ public class ParkingSpotController {
     ParkingSpotService parkingSpotService;
     private final CarRepository carRepository;
 
+
     public ParkingSpotController(ParkingSpotService parkingSpotService,CarRepository carRepository) {
         this.parkingSpotService = parkingSpotService;
         this.carRepository = carRepository;
@@ -26,16 +28,22 @@ public class ParkingSpotController {
 
     @PostMapping
     public ResponseEntity<Object> createParkingSpot(@RequestBody @Valid ParkingSpotDTO parkingSpotDTO){
+        if(parkingSpotService.existsByCarPlateCar(parkingSpotDTO.car().plateCar())){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: plate Car is in use for other people");
+        }
+        if(parkingSpotService.existsByParkingSpotNumber(parkingSpotDTO.parkingSpotNumber())){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Parking Spot Number in use");
+        }
+        if(parkingSpotService.existsByBlock(parkingSpotDTO.block())){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Block/Apartment has ben used");
+        }
+
         var car = new Car();
-        car.setPlateCar(parkingSpotDTO.car().plateCar());
-        car.setModelCar(parkingSpotDTO.car().modelCar());
-        car.setColorCar(parkingSpotDTO.car().colorCar());
+        BeanUtils.copyProperties(parkingSpotDTO.car(), car);
         car = carRepository.save(car);
 
         var parkingSpot = new ParkingSpot();
-        parkingSpot.setParkingSpotNumber(parkingSpotDTO.parkingSpotNumber());
-        parkingSpot.setResponsibleName(parkingSpotDTO.responsibleName());
-        parkingSpot.setBlock(parkingSpotDTO.block());
+        BeanUtils.copyProperties(parkingSpotDTO, parkingSpot);
         parkingSpot.setRegistrationDate(LocalDateTime.now());
         parkingSpot.setCar(car);
 
