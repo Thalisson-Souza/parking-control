@@ -2,23 +2,15 @@ package com.api.parking_control.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "TB_PARKING_SPOT")
-
-@Getter
-@Setter
-@AllArgsConstructor
 public class ParkingSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private Long id;
 
     @Column(name = "parkingSpotNumber", unique = true, nullable = false)
     @NotNull
@@ -32,35 +24,51 @@ public class ParkingSpot {
     @Column(name = "date_register")
     private LocalDateTime registrationDate;
 
-    @Getter
     @Column(name = "responsibleName", unique = true,nullable = false)
     @NotNull
     private String responsibleName;
 
-    @Getter
     @Column(name = "apartment", unique = true,nullable = false)
     @NotNull
     private String block;
 
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setStatus(ch.qos.logback.core.status.Status status) {
+    }
+
+    public enum Status {
+        AVAILABLE,
+        OCCUPIED,
+        RESERVED
+    }
 
     public ParkingSpot() {
     }
 
-    public void setParkingSpotNumber(String parkingSpotNumber) {
-        this.parkingSpotNumber = parkingSpotNumber;
+    public String getBlock() {
+        return block;
     }
 
-    public void setResponsibleName(String responsibleName) {
-        this.responsibleName = responsibleName;
+    public Status getStatus() {
+        return status;
     }
 
     public void setBlock(String block) {
         this.block = block;
     }
 
-    public void setRegistrationDate(LocalDateTime registrationDate) {
-        this.registrationDate = registrationDate;
+    public Car getCar() {
+        return car;
+    }
+
+    public ParkingSpot(Status status) {
+        this.status = status;
     }
 
     public void setCar(Car car) {
@@ -71,8 +79,27 @@ public class ParkingSpot {
         return parkingSpotNumber;
     }
 
-    public UUID getId() {
-        return id;
+    public void setParkingSpotNumber(String parkingSpotNumber) {
+        this.parkingSpotNumber = parkingSpotNumber;
     }
 
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public String getResponsibleName() {
+        return responsibleName;
+    }
+
+    public void setResponsibleName(String responsibleName) {
+        this.responsibleName = responsibleName;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }
