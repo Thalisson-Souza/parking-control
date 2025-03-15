@@ -2,18 +2,11 @@ package com.api.parking_control.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "TB_CAR")
-
-@Getter
-@Setter
-@AllArgsConstructor
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,8 +25,8 @@ public class Car {
     private String colorCar;
 
 
-    public Car() {}
-
+    public Car() {
+    }
 
     public void setId(UUID id) {
         this.id = id;
@@ -49,5 +42,17 @@ public class Car {
 
     public void setColorCar(String colorCar) {
         this.colorCar = colorCar;
+    }
+
+    public String getPlateCar() {
+        return plateCar;
+    }
+
+    public String getModelCar() {
+        return modelCar;
+    }
+
+    public String getColorCar() {
+        return colorCar;
     }
 }
