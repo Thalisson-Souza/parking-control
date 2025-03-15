@@ -1,52 +1,76 @@
 package com.api.parking_control.controllers;
 
 import com.api.parking_control.dtos.ParkingSpotDTO;
-import com.api.parking_control.entity.Car;
 import com.api.parking_control.entity.ParkingSpot;
+import com.api.parking_control.mapper.ParkingSpotMapper;
 import com.api.parking_control.repository.CarRepository;
 import com.api.parking_control.services.ParkingSpotService;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/parking-spot")
 public class ParkingSpotController {
 
-    ParkingSpotService parkingSpotService;
+    private final ParkingSpotService parkingSpotService;
     private final CarRepository carRepository;
+    private final ParkingSpotMapper parkingSpotMapper;
 
 
-    public ParkingSpotController(ParkingSpotService parkingSpotService,CarRepository carRepository) {
+    public ParkingSpotController(ParkingSpotService parkingSpotService, CarRepository carRepository, ParkingSpotMapper parkingSpotMapper) {
         this.parkingSpotService = parkingSpotService;
         this.carRepository = carRepository;
+        this.parkingSpotMapper = parkingSpotMapper;
     }
 
     @PostMapping
     public ResponseEntity<Object> createParkingSpot(@RequestBody @Valid ParkingSpotDTO parkingSpotDTO){
-        if(parkingSpotService.existsByCarPlateCar(parkingSpotDTO.car().plateCar())){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: plate Car is in use for other people");
-        }
-        if(parkingSpotService.existsByParkingSpotNumber(parkingSpotDTO.parkingSpotNumber())){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Parking Spot Number in use");
-        }
-        if(parkingSpotService.existsByBlock(parkingSpotDTO.block())){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Block/Apartment has ben used");
+        ParkingSpot parkingSpot = parkingSpotService.createParkingSpot(parkingSpotDTO);
+
+        if(parkingSpot == null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict");
         }
 
-        var car = new Car();
-        BeanUtils.copyProperties(parkingSpotDTO.car(), car);
-        car = carRepository.save(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(parkingSpot);
+    }
 
-        var parkingSpot = new ParkingSpot();
-        BeanUtils.copyProperties(parkingSpotDTO, parkingSpot);
-        parkingSpot.setRegistrationDate(LocalDateTime.now());
-        parkingSpot.setCar(car);
+    @GetMapping
+    public ResponseEntity <List<ParkingSpotDTO>> getParkingSpotAll(){
+        return ResponseEntity.status(HttpStatus.OK).body(parkingSpotService.findAll());
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(parkingSpotService.createParkingSpot(parkingSpot));
+    @GetMapping("/{id}")
+    public ResponseEntity <Object> getOneParkingSpot(@PathVariable(value = "id") Long id){
+        Optional<ParkingSpotDTO> parkingId = parkingSpotService.getUserById(id);
+        if(!parkingId.isPresent()){
+            return ResponseEntity.status(HttpStatus.FOUND).body("Id not present!");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(parkingId.get());
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity <Object> getNameParkingSpot(@PathVariable(value = "name") String name){
+        return ResponseEntity.ok(parkingSpotService.getNameParkingSpot(name));
+    }
+
+    @GetMapping("/by-number/{spot-number}")
+    public ResponseEntity <Object> getParkingSpotByNumber(@PathVariable(value = "spot-number") String spotNumber){
+        return ResponseEntity.ok(parkingSpotService.getSpotNumber(spotNumber));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateParkingSpot(@RequestBody @Valid ParkingSpotDTO parkingSpotDTO, @PathVariable(value = "id") Long id){
+        return ResponseEntity.ok(parkingSpotService.updateParkingSpot(parkingSpotDTO, id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity <Void> deleteParkingSpot(@PathVariable(value = "id") Long id){
+        parkingSpotService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
